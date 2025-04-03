@@ -1,0 +1,16 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-WTF
+Flask-SocketIO
+Flask-Migrate
+python-dotenv
+Werkzeug
+SQLAlchemy
+WTForms[email]
+greenlet
+eventlet
+# Use 'eventlet' or 'gevent' for production SocketIO server, or rely on Werkzeug's development server for basic async.
+# Werkzeug is usually installed with Flask.
+# SQLAlchemy is usually installed with Flask-SQLAlchemy.
+# greenlet is needed by eventlet/gevent.
