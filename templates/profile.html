@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block head %}
+<style>
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1em;
+        border: 3px solid #ccc;
+    }
+    .form-container img { /* Style specifically for image within form container */
+         display: block; /* Center the image */
+         margin-left: auto;
+         margin-right: auto;
+    }
+     .form-container .form-group { /* Add some spacing between form groups */
+        margin-bottom: 1rem;
+     }
+</style>
+{% endblock %}
+
+
+{% block content %}
+    <h1>Профиль пользователя</h1>
+     <div class="form-container">
+        <img src="{{ avatar_url }}" alt="Текущий аватар" class="profile-avatar">
+
+        <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }} {# CSRF token #}
+
+            {{ render_field(form.username, placeholder='Имя пользователя') }}
+
+            {# {{ render_field(form.email, placeholder='Email') }} #} {# УДАЛЕНО #}
+
+            {{ render_field(form.avatar, label_visible=true) }}
+            <small class="form-text text-muted">Оставьте поле пустым, чтобы не менять аватар. Разрешены: png, jpg, jpeg, gif.</small>
+
+            <hr> {# Separator #}
+
+            {{ render_field(form.bg_image, label_visible=true) }}
+             <small class="form-text text-muted">Оставьте поле пустым, чтобы не менять фон. Разрешены: png, jpg, jpeg, gif.</small>
+             {% if current_user.bg_image %}
+             <p><small>Текущий фон: {{ current_user.bg_image.split('/')[-1] }}</small></p>
+             {% endif %}
+
+            {{ render_field(form.bg_opacity, placeholder='0.0 - 1.0') }}
+            <small class="form-text text-muted">Прозрачность фона: 0.0 (полностью прозрачный) до 1.0 (непрозрачный).</small>
+
+             <hr> {# Separator #}
+
+            {{ render_field(form.submit, label_visible=false) }}
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %} {# Assuming you might create this later for form rendering #}
+
+{% block title %}Чат{% endblock %}
+
+{% block head %}
+<style>
+    #messages {
+        height: 60vh; /* Adjust height as needed */
+        overflow-y: scroll;
+        border: 1px solid #ccc;
+        margin-bottom: 1em;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background for readability */
+        display: flex;
+        flex-direction: column;
+    }
+    .message {
+        display: flex;
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 5px;
+        max-width: 80%;
+        word-wrap: break-word; /* Ensure long words break */
+    }
+    .message .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+        object-fit: cover; /* Ensure avatar image covers the area */
+    }
+    .message .content {
+        display: flex;
+        flex-direction: column;
+    }
+    .message .username {
+        font-weight: bold;
+        margin-bottom: 3px;
+        font-size: 0.9em;
+        color: #555;
+    }
+     .message .timestamp {
+        font-size: 0.75em;
+        color: #999;
+        margin-left: auto; /* Pushes timestamp to the right */
+        padding-left: 10px; /* Spacing from content */
+        align-self: flex-end; /* Align timestamp to bottom right of content block */
+    }
+    .message .text-body {
+       white-space: pre-wrap; /* Respect newlines and spaces in text */
+    }
+
+    .message.mine {
+        align-self: flex-end;
+        background-color: #dcf8c6; /* Light green for own messages */
+        flex-direction: row-reverse; /* Put avatar on the right */
+        text-align: right;
+    }
+    .message.mine .avatar {
+        margin-right: 0;
+        margin-left: 10px;
+    }
+     .message.mine .content {
+         align-items: flex-end; /* Align text etc to the right */
+     }
+     .message.mine .timestamp {
+         margin-left: 0;
+         margin-right: auto;
+         padding-left: 0;
+         padding-right: 10px;
+     }
+
+    .message.other {
+        align-self: flex-start;
+        background-color: #fff; /* White for others' messages */
+    }
+
+    /* Styles for media types */
+    .message-media img {
+        max-width: 200px; /* Limit image size */
+        max-height: 200px;
+        border-radius: 5px;
+        margin-top: 5px;
+        cursor: pointer; /* Indicate it's clickable (maybe for lightbox later) */
+    }
+    .message-media video {
+        max-width: 300px; /* Limit video size */
+        max-height: 200px;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+     .message-media audio {
+        max-width: 250px;
+        margin-top: 5px;
+     }
+    .message-media a {
+        display: inline-block;
+        margin-top: 5px;
+        padding: 5px 10px;
+        background-color: #eee;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        text-decoration: none;
+        color: #333;
+    }
+     .message-media a:hover {
+        background-color: #ddd;
+     }
+
+    #message-form {
+        display: flex;
+        margin-top: 1em;
+    }
+    #message-form input[type="text"] {
+        flex-grow: 1;
+        margin-right: 5px;
+    }
+    #message-form input[type="file"] {
+       max-width: 150px; /* Adjust width */
+       margin-right: 5px;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1>Общий Чат</h1>
+
+    <div id="messages">
+        {% for message in messages %}
+            {% include '_message.html' %} {# Use a partial for message rendering #}
+        {% endfor %}
+    </div>
+
+    {# Use JavaScript to handle this form submission via fetch to /send_message_post #}
+    <form id="message-form" method="POST" action="{{ url_for('send_message_post') }}" enctype="multipart/form-data">
+         {{ form.hidden_tag() }} {# Include CSRF token if using WTForms CSRF #}
+        {{ render_field(form.message, placeholder='Введите сообщение...', class_='form-control') }}
+        {{ render_field(form.media, class_='form-control-file') }}
+        {{ render_field(form.submit, class_='btn btn-primary') }}
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+    {# Inline script or link to a specific JS file for chat functionality #}
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message'); // Assuming WTForms generates id='message'
+        const mediaInput = document.getElementById('media'); // Assuming WTForms generates id='media'
+        const currentUserId = {{ current_user.id }}; // Pass current user ID for styling 'mine' messages
+
+        // Function to scroll to the bottom of the messages div
+        function scrollToBottom() {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Function to render a single message
+        function renderMessage(msg) {
+            // Basic check for necessary data
+            if (!msg || !msg.username || !msg.timestamp) {
+                console.error("Invalid message data received:", msg);
+                return;
+            }
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            if (msg.user_id === currentUserId) {
+                messageElement.classList.add('mine');
+            } else {
+                messageElement.classList.add('other');
+            }
+
+            // Avatar
+            const avatarElement = document.createElement('img');
+            avatarElement.src = msg.avatar || "{{ url_for('static', filename='uploads/avatars/default.jpg') }}"; // Fallback needed
+            avatarElement.alt = `${msg.username}'s avatar`;
+            avatarElement.classList.add('avatar');
+
+            // Content block
+            const contentElement = document.createElement('div');
+            contentElement.classList.add('content');
+
+            // Username
+            const usernameElement = document.createElement('div');
+            usernameElement.classList.add('username');
+            usernameElement.textContent = msg.username;
+            contentElement.appendChild(usernameElement);
+
+            // Message Body (Text)
+            if (msg.body) {
+                const textElement = document.createElement('div');
+                textElement.classList.add('text-body');
+                textElement.textContent = msg.body; // Use textContent to prevent XSS from text
+                contentElement.appendChild(textElement);
+            }
+
+            // Media Content
+            if (msg.media_url && msg.content_type) {
+                const mediaDiv = document.createElement('div');
+                mediaDiv.classList.add('message-media');
+                let mediaElement;
+
+                if (msg.content_type === 'image') {
+                    mediaElement = document.createElement('img');
+                    mediaElement.src = msg.media_url;
+                    mediaElement.alt = msg.media_filename_orig || 'Изображение';
+                } else if (msg.content_type === 'video') {
+                    mediaElement = document.createElement('video');
+                    mediaElement.src = msg.media_url;
+                    mediaElement.controls = true;
+                } else if (msg.content_type === 'audio') {
+                    mediaElement = document.createElement('audio');
+                    mediaElement.src = msg.media_url;
+                    mediaElement.controls = true;
+                } else if (msg.content_type === 'file') {
+                    mediaElement = document.createElement('a');
+                    mediaElement.href = msg.media_url;
+                    mediaElement.textContent = msg.media_filename_orig || 'Скачать файл';
+                    mediaElement.target = '_blank'; // Open in new tab
+                    mediaElement.download = msg.media_filename_orig || ''; // Suggest original filename
+                }
+
+                if (mediaElement) {
+                    mediaDiv.appendChild(mediaElement);
+                    contentElement.appendChild(mediaDiv);
+                }
+            }
+
+             // Timestamp
+             const timestampElement = document.createElement('div');
+             timestampElement.classList.add('timestamp');
+             // Format timestamp nicely (consider using a library like moment.js or day.js later)
+             try {
+                timestampElement.textContent = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+             } catch (e) {
+                 timestampElement.textContent = msg.timestamp; // Fallback
+             }
+
+            // Assemble message
+            messageElement.appendChild(avatarElement);
+            messageElement.appendChild(contentElement);
+            messageElement.appendChild(timestampElement); // Append timestamp within the main message div
+
+            messagesDiv.appendChild(messageElement);
+        }
+
+        // --- SocketIO Event Listener ---
+        // Ensure socket is connected (likely in main.js or here)
+        // Assuming 'socket' is globally available or initialized in main.js
+        // If not, initialize here: const socket = io();
+
+        // Handle incoming messages
+        if (typeof socket !== 'undefined') {
+             socket.on('new_message', function(msg) {
+                console.log('New message received:', msg);
+                renderMessage(msg);
+                scrollToBottom();
+            });
+
+             socket.on('message_error', function(data) {
+                 console.error('Message error:', data.error);
+                 // Optionally display error to user
+                 alert("Ошибка отправки сообщения: " + data.error);
+             });
+
+             socket.on('connect', function() {
+                console.log('Socket connected successfully.');
+             });
+
+             socket.on('disconnect', function() {
+                console.log('Socket disconnected.');
+                // Optionally display a reconnect message or attempt reconnection
+             });
+
+             socket.on('connect_error', (err) => {
+               console.error("Socket connection error:", err);
+             });
+
+        } else {
+            console.error("Socket object not found. Ensure main.js is loaded and initializes Socket.IO.");
+        }
+
+        // --- Form Submission via Fetch ---
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent traditional form submission
+
+            const formData = new FormData(messageForm);
+
+            // Basic client-side check: ensure either text or file is present
+            const text = formData.get('message').trim();
+            const file = formData.get('media'); // This gets the File object
+
+             if (!text && (!file || file.size === 0)) {
+                 alert('Пожалуйста, введите сообщение или выберите файл.');
+                 return; // Stop submission if both are empty
+             }
+
+
+            fetch("{{ url_for('send_message_post') }}", {
+                method: 'POST',
+                body: formData,
+                // headers: { 'Content-Type': 'multipart/form-data' } // Not needed for FormData, browser sets it correctly with boundary
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Try to parse error JSON from server
+                    return response.json().then(err => { throw new Error(err.message || `HTTP error! status: ${response.status}`) });
+                }
+                return response.json(); // Parse success JSON (contains the message data)
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('Message sent successfully via POST:', data.message);
+                    // Clear the form fields after successful submission
+                    messageInput.value = '';
+                    mediaInput.value = null; // Clear file input
+
+                    // Note: The 'new_message' socket event from the server
+                    // will actually add the message to the chat for everyone,
+                    // including the sender. So no need to call renderMessage here.
+                    // If there was no broadcast, we would call renderMessage(data.message);
+                } else {
+                     // Handle explicit error status from server JSON
+                     throw new Error(data.message || 'Server returned an error status.');
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert(`Ошибка отправки сообщения: ${error.message}`);
+            });
+        });
+
+        // Scroll to bottom on initial page load
+        scrollToBottom();
+
+    </script>
+{% endblock %}

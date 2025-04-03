@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Локальный Веб-Чат{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            {% if current_user is defined and current_user.is_authenticated and current_user.bg_image %}
+                background-image: url("{{ url_for('static', filename=current_user.bg_image) }}");
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-attachment: fixed; /* Optional: makes background fixed during scroll */
+            {% else %}
+                background-color: #f4f4f4; /* Default background if no image */
+            {% endif %}
+        }
+        body::before {
+             content: "";
+             position: fixed;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             background-color: rgba(255, 255, 255, {{ 1.0 - (current_user.bg_opacity if current_user is defined and current_user.is_authenticated and current_user.bg_opacity is not none else 1.0) }}); /* White overlay based on opacity */
+             z-index: -1; /* Place overlay behind content */
+             pointer-events: none; /* Allow clicking through the overlay */
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <a href="{{ url_for('index') }}" class="nav-brand">Веб-Чат</a>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('index') }}">Чат</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('profile') }}">Профиль ({{ current_user.username }})</a></li>
+                        <li><a href="{{ url_for('logout') }}">Выйти</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}">Войти</a></li>
+                        <li><a href="{{ url_for('register') }}">Регистрация</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category else 'info' }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+             <p>© {% block year %}{{ now().year if now else '2024' }}{% endblock %} Локальный Веб-Чат.</p>
+        </div>
+    </footer>
+
+     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% macro render_field(field, label_visible=true) %}
+  <div class="form-group {% if field.errors %}has-error{% endif %}">
+    {% if label_visible and field.label %}
+      {{ field.label(class="form-label") }}
+    {% endif %}
+    
+    {% if field.type == 'BooleanField' %}
+        <div class="form-check">
+            {{ field(class_="form-check-input " + kwargs.pop('class_', ''), **kwargs) }}
+            {% if field.label %}
+                {{ field.label(class="form-check-label") }}
+            {% endif %}
+        </div>
+    {% elif field.type == 'RadioField' %}
+        {% for subfield in field %}
+            <div class="form-check">
+                {{ subfield(class_="form-check-input " + kwargs.pop('class_', ''), **kwargs) }}
+                {{ subfield.label(class="form-check-label") }}
+            </div>
+        {% endfor %}
+     {% elif field.type == 'FileField' %}
+         {{ field(class_="form-control-file " + kwargs.pop('class_', ''), **kwargs) }}
+    {% else %}
+      {{ field(class_="form-control " + kwargs.pop('class_', ''), **kwargs) }}
+    {% endif %}
+    
+    {% if field.errors %}
+      <ul class="errors">
+      {% for error in field.errors %}
+        <li class="text-danger">{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_submit_field(field) %}
+    {{ field(class='btn btn-primary ' + kwargs.pop('class_', ''), **kwargs) }}
+{% endmacro %}

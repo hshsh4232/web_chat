@@ -1,0 +1,406 @@
+/* Basic Reset / Normalize (Optional but good practice) */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    color: #333;
+    /* Background image/color/opacity handled inline in base.html */
+    position: relative; /* Needed for pseudo-element overlay */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure body content doesn't get hidden by fixed overlay */
+body > * {
+   position: relative;
+   z-index: 1;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    overflow: auto;
+    padding: 0 20px;
+}
+
+main.container {
+     flex-grow: 1; /* Make main content area fill available space */
+     padding-top: 20px;
+     padding-bottom: 20px;
+}
+
+
+/* Header and Navigation */
+header {
+    background: #333;
+    color: #fff;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: #0779e4 3px solid;
+}
+
+header nav .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: auto;
+    padding: 0 20px;
+}
+
+header a.nav-brand {
+    color: #fff;
+    font-size: 1.5em;
+    text-decoration: none;
+}
+
+header ul.nav-links {
+    display: flex;
+    list-style: none;
+}
+
+header ul.nav-links li {
+    margin-left: 20px;
+}
+
+header ul.nav-links a,
+header ul.nav-links span {
+    color: #fff;
+    text-decoration: none;
+    padding: 5px;
+}
+header ul.nav-links span {
+    color: #ccc; /* Slightly different color for non-link text */
+}
+
+header ul.nav-links a:hover,
+header ul.nav-links a.active {
+    border-bottom: 2px solid #fff;
+}
+
+
+/* Footer */
+footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 15px;
+    margin-top: auto; /* Push footer to bottom */
+}
+
+/* Forms */
+.form-container {
+    background: rgba(255, 255, 255, 0.85); /* Semi-transparent white background */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    max-width: 500px; /* Limit width of login/register/profile forms */
+    margin: 20px auto; /* Center form containers */
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: .5rem;
+    font-weight: bold;
+}
+
+.form-control,
+.form-control-file {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.form-control:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+}
+
+/* Specific tweaks for file/checkbox/radio if needed */
+.form-control-file {
+    padding: .2rem .75rem; /* Adjust padding for file input */
+}
+
+.form-check {
+    position: relative;
+    display: block;
+    padding-left: 1.25rem; /* Space for the checkbox/radio */
+}
+
+.form-check-input {
+    position: absolute;
+    margin-top: .3rem;
+    margin-left: -1.25rem;
+}
+
+.form-check-label {
+    margin-bottom: 0; /* Align label with input */
+    display: inline-block; /* Allow label clicking */
+}
+
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    color: #212529;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+/* Flash Messages */
+.flash-messages {
+    padding: 0;
+    margin: 1em 0;
+    list-style: none;
+}
+
+.alert {
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+
+/* Chat specific styles (from index.html) */
+#messages {
+    height: 60vh; /* Adjust height as needed */
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    margin-bottom: 1em;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background for readability */
+    display: flex;
+    flex-direction: column;
+}
+.message {
+    display: flex;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    max-width: 80%;
+    word-wrap: break-word; /* Ensure long words break */
+}
+.message .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover; /* Ensure avatar image covers the area */
+    flex-shrink: 0; /* Prevent avatar from shrinking */
+}
+.message .content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content from overflowing message bubble */
+}
+.message .username {
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 0.9em;
+    color: #555;
+}
+ .message .timestamp {
+    font-size: 0.75em;
+    color: #999;
+    margin-left: auto; /* Pushes timestamp to the right */
+    padding-left: 10px; /* Spacing from content */
+    align-self: flex-end; /* Align timestamp to bottom right of content block */
+    white-space: nowrap; /* Prevent timestamp wrapping */
+    margin-top: 4px; /* Add slight space above timestamp */
+}
+.message .text-body {
+   white-space: pre-wrap; /* Respect newlines and spaces in text */
+}
+
+.message.mine {
+    align-self: flex-end;
+    background-color: #dcf8c6; /* Light green for own messages */
+    flex-direction: row-reverse; /* Put avatar on the right */
+    /* text-align: right; -- causes issues with flex layout */
+}
+.message.mine .avatar {
+    margin-right: 0;
+    margin-left: 10px;
+}
+ .message.mine .content {
+     align-items: flex-end; /* Align text etc to the right */
+ }
+ .message.mine .timestamp {
+     margin-left: 0;
+     margin-right: auto;
+     padding-left: 0;
+     padding-right: 10px;
+ }
+
+.message.other {
+    align-self: flex-start;
+    background-color: #fff; /* White for others' messages */
+}
+
+/* Styles for media types */
+.message-media img {
+    max-width: 200px; /* Limit image size */
+    max-height: 200px;
+    border-radius: 5px;
+    margin-top: 5px;
+    cursor: pointer; /* Indicate it's clickable (maybe for lightbox later) */
+    display: block; /* Ensure it behaves like a block element */
+}
+.message-media video {
+    max-width: 300px; /* Limit video size */
+    max-height: 200px;
+    border-radius: 5px;
+    margin-top: 5px;
+    display: block;
+}
+ .message-media audio {
+    max-width: 250px;
+    margin-top: 5px;
+     display: block;
+ }
+.message-media a {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 5px 10px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #333;
+    word-break: break-all; /* Break long filenames */
+}
+ .message-media a:hover {
+    background-color: #ddd;
+ }
+
+#message-form {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    margin-top: 1em;
+    background-color: rgba(240, 240, 240, 0.8); /* Slightly grey background for form */
+    padding: 10px;
+    border-radius: 5px;
+}
+#message-form .form-group {
+    margin-bottom: 0; /* Remove default margin */
+    margin-right: 5px; /* Spacing between elements */
+    flex-grow: 1; /* Let text input grow */
+}
+#message-form input[type="text"] {
+   /* flex-grow: 1; -- handled by form-group */
+   /* margin-right: 5px; -- handled by form-group */
+}
+#message-form input[type="file"] {
+   /* max-width: 150px; -- Let WTForms handle this or use a wrapper div if needed */
+   /* margin-right: 5px; -- handled by form-group */
+    flex-grow: 0; /* Don't let file input grow too much */
+    flex-basis: 160px; /* Give it a base width */
+}
+#message-form .btn {
+    flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+/* Profile specific styles */
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1em;
+    border: 3px solid #ccc;
+    display: block; /* Center the image */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Error styling for WTForms */
+.errors {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 0;
+}
+.errors li {
+  color: #dc3545; /* Bootstrap danger color */
+  font-size: 0.85em;
+}
+.has-error .form-control {
+  border-color: #dc3545;
+}
+.has-error .form-label {
+    color: #dc3545;
+}
+
+/* Utility Classes */
+.text-danger {
+    color: #dc3545 !important;
+}
+.text-muted {
+    color: #6c757d !important;
+}

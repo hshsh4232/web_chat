@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+    <h1>Регистрация</h1>
+     <div class="form-container">
+        <form method="POST" action="{{ url_for('register') }}">
+            {{ form.hidden_tag() }} {# CSRF token #}
+
+            {{ render_field(form.username, placeholder='Выберите имя пользователя') }}
+
+            {# {{ render_field(form.email, placeholder='Введите ваш email') }} #} {# УДАЛЕНО #}
+
+            {{ render_field(form.password, placeholder='Придумайте пароль (мин. 6 символов)') }}
+
+            {{ render_field(form.password2, placeholder='Повторите пароль') }}
+
+            {{ render_field(form.submit, label_visible=false) }}
+        </form>
+        <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войдите здесь</a></p>
+    </div>
+{% endblock %}

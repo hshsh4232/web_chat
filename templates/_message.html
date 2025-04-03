@@ -1,0 +1,37 @@
+{# Input: expects a 'message' object with author, body, timestamp, content_type, media_filename #}
+{% set user = message.author %} {# Get the author User object from the relationship #}
+{% set is_mine = current_user.is_authenticated and message.sender_id == current_user.id %}
+
+<div class="message {{ 'mine' if is_mine else 'other' }}" data-message-id="{{ message.id }}">
+    <img src="{{ url_for('static', filename=user.avatar if user.avatar else 'uploads/avatars/default.jpg') }}" alt="{{ user.username }}'s avatar" class="avatar">
+    <div class="content">
+        <div class="username">{{ user.username }}</div>
+
+        {% if message.body %}
+            <div class="text-body">{{ message.body }}</div>
+        {% endif %}
+
+        {% if message.media_filename and message.content_type %}
+            <div class="message-media">
+                {% set media_url = url_for('static', filename=message.media_filename) %}
+                {% if message.content_type == 'image' %}
+                    <img src="{{ media_url }}" alt="Загруженное изображение">
+                {% elif message.content_type == 'video' %}
+                    <video src="{{ media_url }}" controls></video>
+                {% elif message.content_type == 'audio' %}
+                    <audio src="{{ media_url }}" controls></audio>
+                {% elif message.content_type == 'file' %}
+                    {# Try to get original filename if stored, otherwise use generated #}
+                    {% set original_filename = message.media_filename.split('/')[-1] %} {# Basic way to get filename part #}
+                    <a href="{{ media_url }}" target="_blank" download="{{ original_filename }}">Скачать файл</a>
+                 {% else %}
+                     <a href="{{ media_url }}" target="_blank">Просмотреть медиа</a>
+                 {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+     <div class="timestamp">
+         {{ message.timestamp.strftime('%H:%M') if message.timestamp else ''}}
+     </div>
+</div>
